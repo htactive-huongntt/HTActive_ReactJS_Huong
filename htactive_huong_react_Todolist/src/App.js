@@ -1,30 +1,106 @@
 import React, { Component } from "react";
 import "bootstrap/dist/css/bootstrap.css";
 import "./App.css";
-import "./components/Todoitem.css";
 import Todoitem from "./components/Todoitem";
 
 class App extends Component {
   constructor() {
     super();
     this.state = {
-      todos: []
+      todos: [],
+      newtask: ""
     };
   }
 
-  componentDidMount() {
-    fetch(`http://5d1c6501f31e7f00147eb57f.mockapi.io/tasks`)
-      // We get the API response and receive data in JSON format...
+  checkIsCompleted = id => {
+    let task = this.state.todos.find(todos => todos.id === id);
+    task.isCompleted = !task.isCompleted;
+    this.setState({
+      todos: Object.assign(this.state.todos, task)
+    });
+    fetch(`http://5d1c6501f31e7f00147eb57f.mockapi.io/tasks/${id}`, {
+      method: "PUT",
+      mode: "cors",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(task)
+    })
+      .then(response => console.log(response))
+      .catch(error => console.log(error));
+  };
+
+  // updateTask = id => {
+  //   let task = this.state.todos.find(todos => todos.id === id);
+  //   task.isCompleted = !task.isCompleted;
+  //   this.setState({
+  //     todos: Object.assign(this.state.todos, task)
+  //   });
+  //   fetch(`http://5d1c6501f31e7f00147eb57f.mockapi.io/tasks/${id}`, {
+  //     method: "PUT",
+  //     mode: "cors",
+  //     headers: {
+  //       "Content-Type": "application/json"
+  //     },
+  //     body: JSON.stringify(task)
+  //   })
+  //     .then(response => console.log(response))
+  //     .catch(error => console.log(error));
+  // };
+
+  deleteTask = id => {
+    let tasks = this.state.todos;
+    let task = tasks.findIndex(item => item.id === id);
+    tasks.splice(task, 1);
+    this.setState({
+      todos: tasks
+    });
+    fetch(`http://5d1c6501f31e7f00147eb57f.mockapi.io/tasks`, {
+      method: "post",
+      mode: "cors"
+    })
       .then(response => response.json())
-      // ...then we update the todos state
+      .catch(error => console.log(error));
+  };
+
+  addTask = () => {
+    let task = {
+      task: this.state.newtask,
+      isCompleted: false
+    };
+    let array = this.state.todos;
+    array.unshift(task);
+    this.setState({
+      todos: array
+    });
+    fetch(`http://5d1c6501f31e7f00147eb57f.mockapi.io/tasks`, {
+      method: "post",
+      mode: "cors",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(task)
+    })
+      .then(response => response.json())
+      .catch(error => console.log(error));
+    console.log(task, this.state.todos);
+  };
+
+  handleNewTask = event => {
+    this.setState({ newtask: event.target.value });
+  };
+
+  async componentDidMount() {
+    await fetch(`http://5d1c6501f31e7f00147eb57f.mockapi.io/tasks`, {
+      method: "GET"
+    })
+      .then(response => response.json())
       .then(data => {
-        console.log(data);
         this.setState({
           todos: data
         });
       })
-      // Catch any errors we hit and update the app
-      .catch(error => this.setState({ error, isLoading: false }));
+      .catch(error => console.log(error));
   }
 
   render() {
@@ -36,7 +112,7 @@ class App extends Component {
         >
           <div className="col-md-2 col-xs-2 col-lg-2 col-sm-2" />
           <div className="col-md-8 col-xs-8 col-lg-8 col-sm-8">
-            <h2 style={{ color: "white" }}> Things to do for this week!!! </h2>
+            <h2 style={{ color: "black" }}> Things to do for this week!!! </h2>
             <div className="row input-area">
               <div
                 className="form-group col-md-9"
@@ -46,34 +122,15 @@ class App extends Component {
                   type="text"
                   className="form-control inputTask"
                   id="addTask"
+                  onChange={this.handleNewTask}
                 />
-                {/* <input
-                  id="idtemp"
-                  style={{
-                    display: "none",
-                    marginLeft: "0px",
-                    paddingLeft: "0px"
-                  }}
-                />
-                <input
-                  id="tasktemp"
-                  style={{
-                    display: "none",
-                    marginLeft: "0px",
-                    paddingLeft: "0px"
-                  }}
-                />
-                <input
-                  id="indexUndo"
-                  style={{
-                    display: "none",
-                    marginLeft: "0px",
-                    paddingLeft: "0px"
-                  }}
-                /> */}
               </div>
               <div className="form-group col-md-1">
-                <button id="addItem" className="btn btn-primary block">
+                <button
+                  id="addItem"
+                  className="btn btn-primary block"
+                  onClick={this.addTask}
+                >
                   Add an Item
                 </button>
                 <button id="updateItem" className="btn btn-info none">
@@ -126,9 +183,12 @@ class App extends Component {
               </div>
             </div>
             <ul className="list-group" id="taskList">
-              {this.state.todos.map(item => (
-                <Todoitem key={item.id} todos={item} />
-              ))}
+              <Todoitem
+                todos={this.state.todos}
+                checkIsCompleted={this.checkIsCompleted}
+                // update={this.updateTask}
+                deleteTask={this.deleteTask}
+              />
             </ul>
           </div>
           <div className="col-md-2 col-xs-2 col-lg-2 col-sm-2" />

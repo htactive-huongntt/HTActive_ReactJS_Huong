@@ -1,41 +1,60 @@
 import React from "react";
+import "./Todoitem.css";
 
 function Todoitem(props) {
-  let className = "col-md-10 col-xs-10 col-lg-10 col-sm-10 task-text";
-  let check = "";
-  if (props.todos.isCompleted) {
-    check = "defaultChecked";
-    className += " completed";
-  }
+  console.log("po", props);
 
+  const checkCompleted = id => {
+    props.checkIsCompleted(id);
+  };
+  // update = id => {
+  //   props.updateTask(id);
+  // };
+
+  const deleteTask = id => {
+    props.deleteTask(id);
+  };
   return (
     <>
-      <div className="todoitem">
-        <li className="list-group-item checkbox">
-          <div className="row">
-            <div className="col-md-1 col-xs-1 col-lg-1 col-sm-1 checkbox">
-              <label>
-                <input id="toggleTaskStatus" type="checkbox" checked={check} />
-              </label>
-            </div>
-            <div className={className}>
-              {props.todos.task}
+      {props.todos.map(task => (
+        <div className="todoitem" key={task.id}>
+          <li className="list-group-item checkbox">
+            <div className="row">
+              <div className="col-md-1 col-xs-1 col-lg-1 col-sm-1 checkbox">
+                <label>
+                  <input
+                    id="toggleTaskStatus"
+                    type="checkbox"
+                    check={task.isCompleted ? "defaultChecked" : ""}
+                    onClick={() => checkCompleted(task.id)}
+                  />
+                </label>
+              </div>
+              <div
+                className={
+                  task.isCompleted
+                    ? "col-md-10 col-xs-10 col-lg-10 col-sm-10 task-text completed"
+                    : "col-md-10 col-xs-10 col-lg-10 col-sm-10 task-text"
+                }
+              >
+                {task.task}
+              </div>
               <div className="col-md-1 col-xs-1 col-lg-1 col-sm-1 delete-icon-area">
                 <i
-                  className="fa fa-pencil-square-o"
+                  className="fa fa-pencil-square-o pencil"
                   aria-hidden="true"
-                  style={{ liststyletype: "none", marginRight: "8px" }}
+                  // onClick={update(task.id)}
                 />
                 <i
-                  className="fa fa-trash"
+                  className="fa fa-trash trash"
                   aria-hidden="true"
-                  style={{ liststyletype: "none" }}
+                  onClick={() => deleteTask(task.id)}
                 />
               </div>
             </div>
-          </div>
-        </li>
-      </div>
+          </li>
+        </div>
+      ))}
     </>
   );
 }
