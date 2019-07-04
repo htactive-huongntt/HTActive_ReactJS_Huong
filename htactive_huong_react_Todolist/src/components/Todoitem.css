@@ -3,7 +3,14 @@
     background-color: #e8ea91;
     font-style: italic;
 }
+.pencil{
+    list-style-type: "none";
+    margin-Right: "8px"
+}
+.trash{
+    list-style-type: "none";
 
+}
 .fa:hover {
     color: red;
     width: 20px;
@@ -20,4 +27,37 @@
 
 .btn-default:hover {
     background-color: deepskyblue;
+}
+
+.inputTask{
+    margin-Left: "0px";
+    padding-Left: "0px"
+}
+
+.none{
+    display: "none"
+}
+.block{
+    display: "block";
+}
+.btn-controll{
+    width: "150px";
+    height: "auto";
+    margin: "0px 20px 0px 0px"
+}
+.percentBar{
+    color: "white";
+    background-Color: "chartreuse";
+    width: "40px";
+    height: "40px";
+    border-Radius: "100%";
+    text-Align: "center";
+    padding-Top: "5px"
+}
+.btn-undo{
+    width: "150px";
+    height: "auto";
+    margin-Left: "50%";
+    margin-Top: "80px";
+    display: "none"
 }

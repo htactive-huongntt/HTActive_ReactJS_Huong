@@ -16,7 +16,7 @@ class App extends Component {
     fetch(`http://5d1c6501f31e7f00147eb57f.mockapi.io/tasks`)
       // We get the API response and receive data in JSON format...
       .then(response => response.json())
-      // ...then we update the users state
+      // ...then we update the todos state
       .then(data => {
         console.log(data);
         this.setState({
@@ -44,11 +44,10 @@ class App extends Component {
               >
                 <input
                   type="text"
-                  style={{ marginLeft: "0px", paddingLeft: "0px" }}
-                  className="form-control"
+                  className="form-control inputTask"
                   id="addTask"
                 />
-                <input
+                {/* <input
                   id="idtemp"
                   style={{
                     display: "none",
@@ -71,21 +70,13 @@ class App extends Component {
                     marginLeft: "0px",
                     paddingLeft: "0px"
                   }}
-                />
+                /> */}
               </div>
               <div className="form-group col-md-1">
-                <button
-                  id="addItem"
-                  className="btn btn-primary"
-                  style={{ display: "block" }}
-                >
+                <button id="addItem" className="btn btn-primary block">
                   Add an Item
                 </button>
-                <button
-                  id="updateItem"
-                  className="btn btn-info"
-                  style={{ display: "none" }}
-                >
+                <button id="updateItem" className="btn btn-info none">
                   Update Item
                 </button>
               </div>
@@ -94,66 +85,30 @@ class App extends Component {
                 style={{ padding: "0px 0px 0px 12px" }}
               >
                 <button
-                  className="btn btn-success"
                   id="showComplete"
-                  style={{
-                    width: "150px",
-                    height: "auto",
-                    textAlign: "center",
-                    margin: "0px 20px 0px 0px"
-                  }}
+                  className="btn btn-success btn-controll"
                 >
                   Show Completed <br /> Tasks
                 </button>
                 <button
-                  className="btn btn-success"
+                  className="btn btn-success btn-controll"
                   id="hideComplete"
-                  style={{
-                    width: "150px",
-                    height: "auto",
-                    margin: "0px 20px 0px 0px"
-                  }}
                 >
                   Hide Completed <br /> Tasks
                 </button>
                 <button
-                  className="btn btn-success"
+                  className="btn btn-success btn-controll"
                   id="completeAll"
-                  style={{
-                    width: "150px",
-                    height: "auto",
-                    margin: "0px 20px 0px 0px"
-                  }}
                 >
                   Completed All <br /> Tasks
                 </button>
-                <button
-                  className="btn btn-success"
-                  id="showAll"
-                  style={{
-                    width: "150px",
-                    height: "auto",
-                    margin: "0px 20px 0px 0px"
-                  }}
-                >
+                <button className="btn btn-success btn-controll" id="showAll">
                   Show All <br /> Tasks
                 </button>
               </div>
               <div className="form-group col-md-12" style={{ display: "flex" }}>
                 <div className="col-xs-1 col-sm-1 col-md-1 col-lg-1">
-                  <label
-                    htmlFor="percent"
-                    id="percent"
-                    style={{
-                      color: "white",
-                      backgroundColor: "chartreuse",
-                      width: "40px",
-                      height: "40px",
-                      borderRadius: "100%",
-                      textAlign: "center",
-                      paddingTop: "5px"
-                    }}
-                  >
+                  <label htmlFor="percent" id="percent" className="percentBar">
                     50 %
                   </label>
                 </div>
@@ -177,17 +132,7 @@ class App extends Component {
             </ul>
           </div>
           <div className="col-md-2 col-xs-2 col-lg-2 col-sm-2" />
-          <button
-            className="btn btn-warning"
-            style={{
-              width: "150px",
-              height: "auto",
-              marginLeft: "50%",
-              marginTop: "80px",
-              display: "none"
-            }}
-            id="undobtn"
-          >
+          <button className="btn btn-warning btn-undo" id="undobtn">
             Undo
           </button>
         </div>
