@@ -2,18 +2,18 @@ import React from "react";
 import "./Todoitem.css";
 
 function Todoitem(props) {
-  console.log("po", props);
-
   const checkCompleted = id => {
     props.checkIsCompleted(id);
   };
-  // update = id => {
-  //   props.updateTask(id);
-  // };
+
+  const updateTask = id => {
+    props.updateTask(id);
+  };
 
   const deleteTask = id => {
     props.deleteTask(id);
   };
+
   return (
     <>
       {props.todos.map(task => (
@@ -25,7 +25,7 @@ function Todoitem(props) {
                   <input
                     id="toggleTaskStatus"
                     type="checkbox"
-                    check={task.isCompleted ? "defaultChecked" : ""}
+                    defaultChecked={task.isCompleted}
                     onClick={() => checkCompleted(task.id)}
                   />
                 </label>
@@ -43,7 +43,7 @@ function Todoitem(props) {
                 <i
                   className="fa fa-pencil-square-o pencil"
                   aria-hidden="true"
-                  // onClick={update(task.id)}
+                  onClick={() => updateTask(task.id)}
                 />
                 <i
                   className="fa fa-trash trash"

@@ -8,15 +8,22 @@ class App extends Component {
     super();
     this.state = {
       todos: [],
-      newtask: ""
+      newtask: "",
+      filter: "all",
+      idTemp: ""
     };
   }
 
   checkIsCompleted = id => {
-    let task = this.state.todos.find(todos => todos.id === id);
-    task.isCompleted = !task.isCompleted;
+    let newTodos = this.state.todos.map(t => {
+      if (id !== t.id) return t;
+      return {
+        ...t,
+        isCompleted: !t.isCompleted
+      };
+    });
     this.setState({
-      todos: Object.assign(this.state.todos, task)
+      todos: newTodos
     });
     fetch(`http://5d1c6501f31e7f00147eb57f.mockapi.io/tasks/${id}`, {
       method: "PUT",
@@ -24,29 +31,73 @@ class App extends Component {
       headers: {
         "Content-Type": "application/json"
       },
-      body: JSON.stringify(task)
+      body: JSON.stringify(newTodos.find(t => t.id === id))
     })
       .then(response => console.log(response))
       .catch(error => console.log(error));
   };
 
-  // updateTask = id => {
-  //   let task = this.state.todos.find(todos => todos.id === id);
-  //   task.isCompleted = !task.isCompleted;
-  //   this.setState({
-  //     todos: Object.assign(this.state.todos, task)
-  //   });
-  //   fetch(`http://5d1c6501f31e7f00147eb57f.mockapi.io/tasks/${id}`, {
-  //     method: "PUT",
-  //     mode: "cors",
-  //     headers: {
-  //       "Content-Type": "application/json"
-  //     },
-  //     body: JSON.stringify(task)
-  //   })
-  //     .then(response => console.log(response))
-  //     .catch(error => console.log(error));
-  // };
+  showCompleted = () => this.setState({ filter: "completed" });
+
+  componentDidMount() {
+    this.loadData();
+  }
+
+  hideCompleted = () => this.setState({ filter: "active" });
+  showAll = () => this.setState({ filter: "all" });
+
+  loadData = () => {
+    fetch(`http://5d1c6501f31e7f00147eb57f.mockapi.io/tasks`, {
+      method: "GET"
+    })
+      .then(response => response.json())
+      .then(data => {
+        this.setState({
+          todos: data
+        });
+      })
+      .catch(error => console.log(error));
+  };
+
+  updateTask = id => {
+    const btnAdd = document.querySelector(".addItem");
+    btnAdd.setAttribute("class", "btn btn-primary none addItem");
+    const btnUpdate = document.querySelector(".updateItem");
+    btnUpdate.setAttribute("class", "btn btn-info block updateItem");
+    let task = this.state.todos.find(todos => todos.id === id);
+    const txtNewTask = document.querySelector("#addTask");
+    txtNewTask.value = task.task;
+    this.setState({
+      idTemp: task.id
+    });
+  };
+
+  updateValueTask = () => {
+    let newTodos = this.state.todos.map(t => {
+      if (t.id !== this.state.idTemp) return t;
+      return {
+        ...t,
+        task: this.state.newtask
+      };
+    });
+    console.log(newTodos.find(t => t.id === this.state.idTemp));
+    this.setState({
+      todos: newTodos
+    });
+    fetch(
+      `http://5d1c6501f31e7f00147eb57f.mockapi.io/tasks/${this.state.idTemp}`,
+      {
+        method: "PUT",
+        mode: "cors",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(newTodos.find(t => t.id === this.state.idTemp))
+      }
+    )
+      .then(response => console.log(response))
+      .catch(error => console.log(error));
+  };
 
   deleteTask = id => {
     let tasks = this.state.todos;
@@ -55,8 +106,8 @@ class App extends Component {
     this.setState({
       todos: tasks
     });
-    fetch(`http://5d1c6501f31e7f00147eb57f.mockapi.io/tasks`, {
-      method: "post",
+    fetch(`http://5d1c6501f31e7f00147eb57f.mockapi.io/tasks/${id}`, {
+      method: "delete",
       mode: "cors"
     })
       .then(response => response.json())
@@ -68,8 +119,7 @@ class App extends Component {
       task: this.state.newtask,
       isCompleted: false
     };
-    let array = this.state.todos;
-    array.unshift(task);
+    let array = [...this.state.todos, task];
     this.setState({
       todos: array
     });
@@ -83,25 +133,22 @@ class App extends Component {
     })
       .then(response => response.json())
       .catch(error => console.log(error));
-    console.log(task, this.state.todos);
   };
 
   handleNewTask = event => {
     this.setState({ newtask: event.target.value });
   };
 
-  async componentDidMount() {
-    await fetch(`http://5d1c6501f31e7f00147eb57f.mockapi.io/tasks`, {
-      method: "GET"
-    })
-      .then(response => response.json())
-      .then(data => {
-        this.setState({
-          todos: data
-        });
-      })
-      .catch(error => console.log(error));
-  }
+  getFilterTodo = () => {
+    switch (this.state.filter) {
+      case "active":
+        return this.state.todos.filter(t => !t.isCompleted);
+      case "completed":
+        return this.state.todos.filter(t => t.isCompleted);
+      default:
+        return this.state.todos;
+    }
+  };
 
   render() {
     return (
@@ -128,12 +175,16 @@ class App extends Component {
               <div className="form-group col-md-1">
                 <button
                   id="addItem"
-                  className="btn btn-primary block"
+                  className="btn btn-primary block addItem"
                   onClick={this.addTask}
                 >
                   Add an Item
                 </button>
-                <button id="updateItem" className="btn btn-info none">
+                <button
+                  id="updateItem"
+                  className="btn btn-info none updateItem"
+                  onClick={this.updateValueTask}
+                >
                   Update Item
                 </button>
               </div>
@@ -144,12 +195,14 @@ class App extends Component {
                 <button
                   id="showComplete"
                   className="btn btn-success btn-controll"
+                  onClick={this.showCompleted}
                 >
                   Show Completed <br /> Tasks
                 </button>
                 <button
                   className="btn btn-success btn-controll"
                   id="hideComplete"
+                  onClick={this.hideCompleted}
                 >
                   Hide Completed <br /> Tasks
                 </button>
@@ -159,34 +212,20 @@ class App extends Component {
                 >
                   Completed All <br /> Tasks
                 </button>
-                <button className="btn btn-success btn-controll" id="showAll">
+                <button
+                  className="btn btn-success btn-controll"
+                  id="showAll"
+                  onClick={this.showAll}
+                >
                   Show All <br /> Tasks
                 </button>
-              </div>
-              <div className="form-group col-md-12" style={{ display: "flex" }}>
-                <div className="col-xs-1 col-sm-1 col-md-1 col-lg-1">
-                  <label htmlFor="percent" id="percent" className="percentBar">
-                    50 %
-                  </label>
-                </div>
-                <div
-                  className="col-xs-11 col-sm-11 col-md-11 col-lg-11"
-                  style={{ paddingTop: "11px" }}
-                >
-                  <div className="progress">
-                    <div
-                      className="progress-bar bg-warning progress-bar-striped"
-                      id="checkline"
-                    />
-                  </div>
-                </div>
               </div>
             </div>
             <ul className="list-group" id="taskList">
               <Todoitem
-                todos={this.state.todos}
+                todos={this.getFilterTodo()}
                 checkIsCompleted={this.checkIsCompleted}
-                // update={this.updateTask}
+                updateTask={this.updateTask}
                 deleteTask={this.deleteTask}
               />
             </ul>
