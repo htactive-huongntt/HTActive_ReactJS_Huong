@@ -1,0 +1,9 @@
+.percentBar{
+    color: white;
+    background-Color: chartreuse;
+    width: 40px;
+    height:40px;
+    border-Radius: 100%;
+    text-Align: center;
+    padding-Top: 5px
+}

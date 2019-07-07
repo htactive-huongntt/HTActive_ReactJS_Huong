@@ -1,0 +1,12 @@
+.completed {
+    text-decoration: line-through;
+    background-color: #e8ea91;
+    font-style: italic;
+}
+.pencil{
+    list-style-type: block;
+    margin-Right: 8px
+}
+.trash{
+    list-style-type: block;
+}
