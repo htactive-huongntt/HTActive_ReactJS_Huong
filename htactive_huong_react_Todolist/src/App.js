@@ -13,7 +13,12 @@ class App extends Component {
       newtask: "",
       filter: "",
       idTemp: "",
-      percent: 0
+      percent: 0,
+      btnShowCompl: false,
+      btnShowAll: false,
+      btnHideCompl: false,
+      btnComplAll: false,
+      btnClassName: "btn btn-controll"
     };
   }
 
@@ -28,7 +33,12 @@ class App extends Component {
     let per = Math.floor(this.countPercent(newTodos));
     this.setState({
       todos: newTodos,
-      percent: per
+      percent: per,
+      btnShowCompl: false,
+      btnShowAll: false,
+      btnHideCompl: false,
+      btnComplAll: false,
+      btnClassName: "btn btn-controll"
     });
     fetch(`http://5d1c6501f31e7f00147eb57f.mockapi.io/tasks/${id}`, {
       method: "PUT",
@@ -53,10 +63,38 @@ class App extends Component {
     this.loadData();
   }
 
-  showCompleted = () => this.setState({ filter: "completed" });
-  completedAll = () => this.setState({ filter: "completedAll" });
-  hideCompleted = () => this.setState({ filter: "active" });
-  showAll = () => this.setState({ filter: "all" });
+  showCompleted = () =>
+    this.setState({
+      filter: "completed",
+      btnShowCompl: true,
+      btnComplAll: false,
+      btnHideCompl: false,
+      btnShowAll: false
+    });
+  completedAll = () =>
+    this.setState({
+      filter: "completedAll",
+      btnShowCompl: false,
+      btnComplAll: true,
+      btnHideCompl: false,
+      btnShowAll: false
+    });
+  hideCompleted = () =>
+    this.setState({
+      filter: "active",
+      btnShowCompl: false,
+      btnComplAll: false,
+      btnHideCompl: true,
+      btnShowAll: false
+    });
+  showAll = () =>
+    this.setState({
+      filter: "all",
+      btnShowCompl: false,
+      btnComplAll: false,
+      btnHideCompl: false,
+      btnShowAll: true
+    });
 
   loadData = () => {
     fetch(`http://5d1c6501f31e7f00147eb57f.mockapi.io/tasks`, {
@@ -184,38 +222,14 @@ class App extends Component {
   };
 
   getFilterTodo = () => {
-    let btnCompleted = document.querySelector("#showCompleted");
-    let btnCompltedAll = document.querySelector("#completedAll");
-    let btnShowAll = document.querySelector("#showAll");
-    let btnHideCompleted = document.querySelector("#hideCompleted");
-
     switch (this.state.filter) {
       case "active":
-        btnCompleted.setAttribute("class", "btn btn-default btn-controll");
-        btnCompltedAll.setAttribute("class", "btn btn-default btn-controll");
-        btnShowAll.setAttribute("class", "btn btn-default btn-controll");
-        btnHideCompleted.setAttribute("class", "btn btn-success btn-controll");
         return this.state.todos.filter(t => !t.isCompleted);
-
       case "completed":
-        btnCompleted.setAttribute("class", "btn btn-success btn-controll");
-        btnCompltedAll.setAttribute("class", "btn btn-default btn-controll");
-        btnShowAll.setAttribute("class", "btn btn-default btn-controll");
-        btnHideCompleted.setAttribute("class", "btn btn-default btn-controll");
         return this.state.todos.filter(t => t.isCompleted);
-
       case "all":
-        btnCompleted.setAttribute("class", "btn btn-default btn-controll");
-        btnCompltedAll.setAttribute("class", "btn btn-default btn-controll");
-        btnShowAll.setAttribute("class", "btn btn-success btn-controll");
-        btnHideCompleted.setAttribute("class", "btn btn-default btn-controll");
         return this.state.todos;
-
       case "completedAll":
-        btnCompleted.setAttribute("class", "btn btn-default btn-controll");
-        btnCompltedAll.setAttribute("class", "btn btn-success btn-controll");
-        btnShowAll.setAttribute("class", "btn btn-default btn-controll");
-        btnHideCompleted.setAttribute("class", "btn btn-default btn-controll");
         return this.state.todos;
       default:
         return this.state.todos;
@@ -225,10 +239,7 @@ class App extends Component {
   render() {
     return (
       <>
-        <div
-          className="content-area row"
-          style={{ border: "2px solid black", padding: "8% 2% 8% 2%" }}
-        >
+        <div className="content-area row" style={{ padding: "8% 2% 8% 2%" }}>
           <div className="col-md-2 col-xs-2 col-lg-2 col-sm-2" />
           <div className="col-md-8 col-xs-8 col-lg-8 col-sm-8">
             <h2 style={{ color: "black" }}> Things to do for this week!!! </h2>
@@ -249,7 +260,7 @@ class App extends Component {
                 <Button
                   btnId="addItem"
                   content="Add New Task"
-                  className="btn btn-primary block addItem"
+                  className={"btn btn-primary block addItem"}
                   onclick={this.addTask}
                 />
                 <Button
@@ -266,25 +277,41 @@ class App extends Component {
                 <Button
                   btnId="showCompleted"
                   content="Show Completed Tasks"
-                  className="btn btn-default btn-controll"
+                  className={
+                    this.state.btnShowCompl
+                      ? this.state.btnClassName + " btn-success"
+                      : this.state.btnClassName
+                  }
                   onclick={this.showCompleted}
                 />
                 <Button
                   btnId="hideCompleted"
                   content="Hide Completed tasks"
-                  className="btn btn-default btn-controll"
+                  className={
+                    this.state.btnHideCompl
+                      ? this.state.btnClassName + " btn-success"
+                      : this.state.btnClassName
+                  }
                   onclick={this.hideCompleted}
                 />
                 <Button
                   btnId="completedAll"
                   content="Completed All Tasks"
-                  className="btn btn-default btn-controll"
+                  className={
+                    this.state.btnComplAll
+                      ? this.state.btnClassName + " btn-success"
+                      : this.state.btnClassName
+                  }
                   onclick={this.completedAll}
                 />
                 <Button
                   btnId="showAll"
                   content="Show All Tasks"
-                  className="btn btn-default btn-controll"
+                  className={
+                    this.state.btnShowAll
+                      ? this.state.btnClassName + " btn-success"
+                      : this.state.btnClassName
+                  }
                   onclick={this.showAll}
                 />
               </div>
