@@ -2,6 +2,8 @@ import React, { Component } from "react";
 import "bootstrap/dist/css/bootstrap.css";
 import "./App.css";
 import Todoitem from "./components/Todoitem";
+import ProcessBar from "./components/ProcessBar";
+import Button from "./components/Button";
 
 class App extends Component {
   constructor() {
@@ -9,8 +11,14 @@ class App extends Component {
     this.state = {
       todos: [],
       newtask: "",
-      filter: "all",
-      idTemp: ""
+      filter: "",
+      idTemp: "",
+      percent: 0,
+      btnShowCompl: false,
+      btnShowAll: false,
+      btnHideCompl: false,
+      btnComplAll: false,
+      btnClassName: "btn btn-controll"
     };
   }
 
@@ -22,8 +30,15 @@ class App extends Component {
         isCompleted: !t.isCompleted
       };
     });
+    let per = Math.floor(this.countPercent(newTodos));
     this.setState({
-      todos: newTodos
+      todos: newTodos,
+      percent: per,
+      btnShowCompl: false,
+      btnShowAll: false,
+      btnHideCompl: false,
+      btnComplAll: false,
+      btnClassName: "btn btn-controll"
     });
     fetch(`http://5d1c6501f31e7f00147eb57f.mockapi.io/tasks/${id}`, {
       method: "PUT",
@@ -37,14 +52,49 @@ class App extends Component {
       .catch(error => console.log(error));
   };
 
-  showCompleted = () => this.setState({ filter: "completed" });
+  countPercent = array => {
+    let total = array.length;
+    let completed = array.filter(t => t.isCompleted).length;
+    let per = (completed / total) * 100;
+    return per;
+  };
 
   componentDidMount() {
     this.loadData();
   }
 
-  hideCompleted = () => this.setState({ filter: "active" });
-  showAll = () => this.setState({ filter: "all" });
+  showCompleted = () =>
+    this.setState({
+      filter: "completed",
+      btnShowCompl: true,
+      btnComplAll: false,
+      btnHideCompl: false,
+      btnShowAll: false
+    });
+  completedAll = () =>
+    this.setState({
+      filter: "completedAll",
+      btnShowCompl: false,
+      btnComplAll: true,
+      btnHideCompl: false,
+      btnShowAll: false
+    });
+  hideCompleted = () =>
+    this.setState({
+      filter: "active",
+      btnShowCompl: false,
+      btnComplAll: false,
+      btnHideCompl: true,
+      btnShowAll: false
+    });
+  showAll = () =>
+    this.setState({
+      filter: "all",
+      btnShowCompl: false,
+      btnComplAll: false,
+      btnHideCompl: false,
+      btnShowAll: true
+    });
 
   loadData = () => {
     fetch(`http://5d1c6501f31e7f00147eb57f.mockapi.io/tasks`, {
@@ -52,8 +102,10 @@ class App extends Component {
     })
       .then(response => response.json())
       .then(data => {
+        let per = Math.floor(this.countPercent(data));
         this.setState({
-          todos: data
+          todos: data.reverse(),
+          percent: per
         });
       })
       .catch(error => console.log(error));
@@ -65,10 +117,9 @@ class App extends Component {
     const btnUpdate = document.querySelector(".updateItem");
     btnUpdate.setAttribute("class", "btn btn-info block updateItem");
     let task = this.state.todos.find(todos => todos.id === id);
-    const txtNewTask = document.querySelector("#addTask");
-    txtNewTask.value = task.task;
     this.setState({
-      idTemp: task.id
+      idTemp: task.id,
+      newtask: task.task
     });
   };
 
@@ -80,10 +131,18 @@ class App extends Component {
         task: this.state.newtask
       };
     });
-    console.log(newTodos.find(t => t.id === this.state.idTemp));
+    let total = newTodos.length;
+    let completed = newTodos.filter(t => t.isCompleted).length;
+    let per = (completed / total) * 100;
     this.setState({
-      todos: newTodos
+      todos: newTodos,
+      percent: per,
+      newtask: ""
     });
+    const btnAdd = document.querySelector(".addItem");
+    btnAdd.setAttribute("class", "btn btn-primary block addItem");
+    const btnUpdate = document.querySelector(".updateItem");
+    btnUpdate.setAttribute("class", "btn btn-info none updateItem");
     fetch(
       `http://5d1c6501f31e7f00147eb57f.mockapi.io/tasks/${this.state.idTemp}`,
       {
@@ -104,35 +163,58 @@ class App extends Component {
     let task = tasks.findIndex(item => item.id === id);
     tasks.splice(task, 1);
     this.setState({
-      todos: tasks
+      todos: tasks,
+      percent: Math.floor(this.countPercent(tasks))
     });
     fetch(`http://5d1c6501f31e7f00147eb57f.mockapi.io/tasks/${id}`, {
       method: "delete",
       mode: "cors"
-    })
-      .then(response => response.json())
-      .catch(error => console.log(error));
+    });
   };
 
+  randomId() {
+    let text = "";
+    let possible =
+      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    for (let i = 0; i < 10; i++)
+      text += possible.charAt(Math.floor(Math.random() * possible.length));
+    return text;
+  }
+
   addTask = () => {
-    let task = {
-      task: this.state.newtask,
-      isCompleted: false
-    };
-    let array = [...this.state.todos, task];
-    this.setState({
-      todos: array
-    });
-    fetch(`http://5d1c6501f31e7f00147eb57f.mockapi.io/tasks`, {
-      method: "post",
-      mode: "cors",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(task)
-    })
-      .then(response => response.json())
-      .catch(error => console.log(error));
+    console.log(this.state.newtask);
+    if (this.state.newtask === "") {
+      alert("Please enter data !");
+    } else {
+      const check = this.state.todos.some(
+        currTask => currTask.task === this.state.newtask
+      );
+      if (check) {
+        alert("This Task Is Already Exists !!");
+      } else {
+        let task = {
+          id: this.randomId(),
+          task: this.state.newtask,
+          isCompleted: false
+        };
+        let array = [task, ...this.state.todos];
+        this.setState({
+          todos: array,
+          newtask: "",
+          percent: Math.floor(this.countPercent(array))
+        });
+        fetch(`http://5d1c6501f31e7f00147eb57f.mockapi.io/tasks`, {
+          method: "post",
+          mode: "cors",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(task)
+        })
+          .then(response => response.json())
+          .catch(error => console.log(error));
+      }
+    }
   };
 
   handleNewTask = event => {
@@ -145,6 +227,10 @@ class App extends Component {
         return this.state.todos.filter(t => !t.isCompleted);
       case "completed":
         return this.state.todos.filter(t => t.isCompleted);
+      case "all":
+        return this.state.todos;
+      case "completedAll":
+        return this.state.todos;
       default:
         return this.state.todos;
     }
@@ -153,73 +239,83 @@ class App extends Component {
   render() {
     return (
       <>
-        <div
-          className="content-area row"
-          style={{ border: "2px solid black", padding: "8% 2% 8% 2%" }}
-        >
+        <div className="content-area row" style={{ padding: "8% 2% 8% 2%" }}>
           <div className="col-md-2 col-xs-2 col-lg-2 col-sm-2" />
           <div className="col-md-8 col-xs-8 col-lg-8 col-sm-8">
             <h2 style={{ color: "black" }}> Things to do for this week!!! </h2>
             <div className="row input-area">
               <div
                 className="form-group col-md-9"
-                style={{ marginLeft: "0px", paddingLeft: "0px" }}
+                style={{ marginLeft: "30px", paddingLeft: "10px" }}
               >
                 <input
                   type="text"
                   className="form-control inputTask"
                   id="addTask"
+                  value={this.state.newtask}
                   onChange={this.handleNewTask}
                 />
               </div>
-              <div className="form-group col-md-1">
-                <button
-                  id="addItem"
-                  className="btn btn-primary block addItem"
-                  onClick={this.addTask}
-                >
-                  Add an Item
-                </button>
-                <button
-                  id="updateItem"
+              <div className="form-group col-md-2">
+                <Button
+                  btnId="addItem"
+                  content="Add New Task"
+                  className={"btn btn-primary block addItem"}
+                  onclick={this.addTask}
+                />
+                <Button
+                  btnId="updateItem"
+                  content="Update Task"
                   className="btn btn-info none updateItem"
-                  onClick={this.updateValueTask}
-                >
-                  Update Item
-                </button>
+                  onclick={this.updateValueTask}
+                />
               </div>
               <div
                 className="form-group col-md-12"
                 style={{ padding: "0px 0px 0px 12px" }}
               >
-                <button
-                  id="showComplete"
-                  className="btn btn-success btn-controll"
-                  onClick={this.showCompleted}
-                >
-                  Show Completed <br /> Tasks
-                </button>
-                <button
-                  className="btn btn-success btn-controll"
-                  id="hideComplete"
-                  onClick={this.hideCompleted}
-                >
-                  Hide Completed <br /> Tasks
-                </button>
-                <button
-                  className="btn btn-success btn-controll"
-                  id="completeAll"
-                >
-                  Completed All <br /> Tasks
-                </button>
-                <button
-                  className="btn btn-success btn-controll"
-                  id="showAll"
-                  onClick={this.showAll}
-                >
-                  Show All <br /> Tasks
-                </button>
+                <Button
+                  btnId="showCompleted"
+                  content="Show Completed Tasks"
+                  className={
+                    this.state.btnShowCompl
+                      ? this.state.btnClassName + " btn-success"
+                      : this.state.btnClassName
+                  }
+                  onclick={this.showCompleted}
+                />
+                <Button
+                  btnId="hideCompleted"
+                  content="Hide Completed tasks"
+                  className={
+                    this.state.btnHideCompl
+                      ? this.state.btnClassName + " btn-success"
+                      : this.state.btnClassName
+                  }
+                  onclick={this.hideCompleted}
+                />
+                <Button
+                  btnId="completedAll"
+                  content="Completed All Tasks"
+                  className={
+                    this.state.btnComplAll
+                      ? this.state.btnClassName + " btn-success"
+                      : this.state.btnClassName
+                  }
+                  onclick={this.completedAll}
+                />
+                <Button
+                  btnId="showAll"
+                  content="Show All Tasks"
+                  className={
+                    this.state.btnShowAll
+                      ? this.state.btnClassName + " btn-success"
+                      : this.state.btnClassName
+                  }
+                  onclick={this.showAll}
+                />
               </div>
+              <ProcessBar width={this.state.percent} />
             </div>
             <ul className="list-group" id="taskList">
               <Todoitem
