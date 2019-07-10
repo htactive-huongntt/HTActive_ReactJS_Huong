@@ -1,11 +1,12 @@
 import React from "react";
-// import { BrowserRouter as Router, Route, Link } from "react-router-dom";
 
 const Contact = props => {
+  console.log(props);
   return (
     <div>
       <p> Day la trang lien he</p>
-      <img src={props.location.status} />
+      {/* <img src={props.location.state.image} alt="anh ko hien thi contact" /> */}
+      <h1> contact</h1>
     </div>
   );
 };
